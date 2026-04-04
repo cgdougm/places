@@ -7,9 +7,10 @@ let projects = $state<Project[]>([]);
 let activeProjectId = $state<string | null>(null);
 
 // ── derived ───────────────────────────────────────────────────────────────────
-export const activeProject = $derived(
-  projects.find(p => p.id === activeProjectId) ?? null
-);
+// Svelte 5: $derived cannot be exported directly — expose as a getter function.
+export function getActiveProject() {
+  return projects.find(p => p.id === activeProjectId) ?? null;
+}
 
 // ── persistence ───────────────────────────────────────────────────────────────
 async function persist() {

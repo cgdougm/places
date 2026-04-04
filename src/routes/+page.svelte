@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getProjects, getActiveId, activeProject } from '$lib/stores/projects.svelte';
+  import { getProjects, getActiveId, getActiveProject } from '$lib/stores/projects.svelte';
   import ProjectList from '$lib/components/ProjectList.svelte';
   import ProjectPanel from '$lib/components/ProjectPanel.svelte';
   import FileBrowser from '$lib/components/FileBrowser.svelte';
@@ -11,8 +11,8 @@
   <ProjectList />
 
   <div class="main-area">
-    {#if activeProject}
-      <ProjectPanel project={activeProject} />
+    {#if getActiveProject() !== null}
+      <ProjectPanel project={getActiveProject()!} />
     {:else if getProjects().length === 0}
       <div class="empty-state">
         <div class="empty-icon">◈</div>
@@ -28,7 +28,7 @@
   </div>
 
   {#if showBrowser}
-    <FileBrowser project={activeProject} />
+    <FileBrowser project={getActiveProject()} />
   {/if}
 
   <button

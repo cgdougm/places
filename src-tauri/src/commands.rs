@@ -1,5 +1,5 @@
 use crate::store::{AppData, DataStore};
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use std::sync::{Arc, Mutex};
 use tauri::State;
 
@@ -41,7 +41,6 @@ pub struct FileEntry {
 #[tauri::command]
 pub async fn list_dir(path: String) -> Result<Vec<FileEntry>, String> {
     use chrono::{DateTime, Utc};
-    use std::time::SystemTime;
 
     let mut entries = tokio::fs::read_dir(&path)
         .await

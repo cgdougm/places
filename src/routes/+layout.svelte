@@ -68,9 +68,9 @@
     --active-bg:    rgba(255,255,255,0.1);
     --badge-bg:     rgba(255,255,255,0.08);
     --border:       rgba(255,255,255,0.1);
-    --text:         #e8e8ec;
-    --text-muted:   #888899;
-    --text-secondary: #aaaabc;
+    --text:         #f2f2f7;
+    --text-muted:   #a0a0b8;
+    --text-secondary: #c4c4d8;
     --input-bg:     #2a2a2f;
     --accent:       #4f8ef7;
     --header-bg:    #111114;
