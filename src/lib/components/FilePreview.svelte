@@ -1,6 +1,5 @@
 <script lang="ts">
   import { invoke } from '@tauri-apps/api/core';
-  import { convertFileSrc } from '@tauri-apps/api/core';
   import { fileExtension, basename } from '$lib/utils/paths';
   import { onMount } from 'svelte';
   import { marked } from 'marked';
@@ -56,15 +55,28 @@
     error = '';
     const ext = fileExtension(path);
 
+    const MIME: Record<string, string> = {
+      mp4: 'video/mp4', webm: 'video/webm', ogg: 'video/ogg', mov: 'video/mp4',
+      png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif',
+      webp: 'image/webp', svg: 'image/svg+xml', bmp: 'image/bmp', ico: 'image/x-icon',
+      avif: 'image/avif',
+    };
+
     if (VIDEO_EXTS.has(ext)) {
-      assetUrl = convertFileSrc(path);
-      mode = 'video';
+      try {
+        const b64 = await invoke<string>('read_binary_file', { path });
+        assetUrl = `data:${MIME[ext] ?? 'video/mp4'};base64,${b64}`;
+        mode = 'video';
+      } catch (e) { error = String(e); mode = 'unsupported'; }
       return;
     }
 
     if (IMAGE_EXTS.has(ext)) {
-      assetUrl = convertFileSrc(path);
-      mode = 'image';
+      try {
+        const b64 = await invoke<string>('read_binary_file', { path });
+        assetUrl = `data:${MIME[ext] ?? 'image/png'};base64,${b64}`;
+        mode = 'image';
+      } catch (e) { error = String(e); mode = 'unsupported'; }
       return;
     }
 

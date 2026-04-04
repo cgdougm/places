@@ -1,6 +1,8 @@
 mod commands;
 mod store;
 
+use tauri::Manager;
+
 use commands::StoreState;
 use store::{LocalJsonStore};
 use std::sync::{Arc, Mutex};
@@ -37,6 +39,7 @@ pub fn run() {
             commands::open_path,
             commands::open_url,
             commands::reveal_path,
+            commands::read_binary_file,
             commands::read_clipboard,
         ])
         .run(tauri::generate_context!())

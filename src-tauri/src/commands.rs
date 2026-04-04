@@ -24,7 +24,7 @@ pub fn save_app_data(json: String, store: State<StoreState>) -> Result<(), Strin
 #[tauri::command]
 pub fn get_store_location(store: State<StoreState>) -> Result<String, String> {
     let s = store.lock().map_err(|e| e.to_string())?;
-    Ok(s.location())
+    Ok(s.meta().location)
 }
 
 // ── File system ───────────────────────────────────────────────────────────────
@@ -138,6 +138,18 @@ pub async fn reveal_path(path: String) -> Result<(), String> {
 }
 
 // ── Clipboard ─────────────────────────────────────────────────────────────────
+
+#[tauri::command]
+pub async fn read_binary_file(path: String) -> Result<String, String> {
+    use base64::{engine::general_purpose::STANDARD, Engine};
+    const MAX_BYTES: u64 = 20 * 1024 * 1024; // 20 MB for images/video
+    let meta = tokio::fs::metadata(&path).await.map_err(|e| e.to_string())?;
+    if meta.len() > MAX_BYTES {
+        return Err(format!("File too large ({:.1} MB)", meta.len() as f64 / 1_048_576.0));
+    }
+    let bytes = tokio::fs::read(&path).await.map_err(|e| e.to_string())?;
+    Ok(STANDARD.encode(&bytes))
+}
 
 #[tauri::command]
 pub fn read_clipboard(app: tauri::AppHandle) -> Result<String, String> {
