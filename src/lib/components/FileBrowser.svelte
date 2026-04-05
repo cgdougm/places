@@ -151,7 +151,7 @@
 .entry:hover { background: var(--hover-bg); }
 
 .entry-icon { font-size: 13px; flex-shrink: 0; }
-.entry-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.entry-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
 .entry-size { font-size: 10px; color: var(--text-muted); flex-shrink: 0; }
 
 .link-btn {
