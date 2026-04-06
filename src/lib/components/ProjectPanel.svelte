@@ -6,16 +6,42 @@
 
   let { project }: { project: Project } = $props();
 
-  let showAdd = $state(false);
-  let filter = $state<'all' | 'file' | 'url' | 'text'>('all');
+  let showAdd    = $state(false);
+  let filter     = $state<'all' | 'file' | 'url' | 'text'>('all');
   let previewItem = $state<PlaceItem | null>(null);
 
   const filtered = $derived(
     filter === 'all' ? project.items : project.items.filter(i => i.type === filter)
   );
+
+  // ── Preview strip drag-resize ─────────────────────────────────────────────────
+  const MIN_PREVIEW = 80;
+  const MAX_PREVIEW = 600;
+
+  let previewH  = $state(280);
+  let dragging  = $state(false);
+  let dragStartY = 0;
+  let dragStartH = 0;
+
+  function startDrag(e: MouseEvent) {
+    dragging   = true;
+    dragStartY = e.clientY;
+    dragStartH = previewH;
+    e.preventDefault();
+  }
+
+  function handleMouseMove(e: MouseEvent) {
+    if (!dragging) return;
+    const delta = dragStartY - e.clientY; // dragging up = bigger preview
+    previewH = Math.max(MIN_PREVIEW, Math.min(MAX_PREVIEW, dragStartH + delta));
+  }
+
+  function stopDrag() { dragging = false; }
 </script>
 
-<div class="panel">
+<svelte:window onmousemove={handleMouseMove} onmouseup={stopDrag} />
+
+<div class="panel" class:dragging-v={dragging}>
   <div class="panel-header">
     <div class="project-title">
       <span class="dot" style="background:{project.color}"></span>
@@ -57,10 +83,19 @@
   </div>
 
   {#if previewItem && previewItem.type === 'file'}
-    <div class="preview-strip">
+    <!-- Horizontal splitter -->
+    <div class="h-splitter" onmousedown={startDrag} title="Drag to resize preview">
+      <div class="h-track"></div>
+      <button
+        class="collapse-btn"
+        onclick={() => previewItem = null}
+        title="Close preview"
+      >✕</button>
+    </div>
+
+    <div class="preview-strip" style="height:{previewH}px">
       <div class="preview-header">
         <span>Preview: {previewItem.label}</span>
-        <button class="icon-btn" onclick={() => previewItem = null}>✕</button>
       </div>
       <FilePreview path={previewItem.value} />
     </div>
@@ -78,6 +113,7 @@
   flex-direction: column;
   overflow: hidden;
 }
+.panel.dragging-v { cursor: row-resize; user-select: none; }
 
 .panel-header {
   display: flex;
@@ -87,116 +123,108 @@
   border-bottom: 1px solid var(--border);
   gap: 12px;
   flex-wrap: wrap;
-}
-
-.project-title {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.dot {
-  width: 12px; height: 12px;
-  border-radius: 50%;
   flex-shrink: 0;
 }
 
-h1 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-}
+.project-title { display: flex; align-items: center; gap: 10px; }
+
+.dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+
+h1 { margin: 0; font-size: 18px; font-weight: 600; }
 
 .count {
-  font-size: 12px;
-  color: var(--text-muted);
-  background: var(--badge-bg);
-  padding: 2px 8px;
-  border-radius: 10px;
+  font-size: 12px; color: var(--text-muted);
+  background: var(--badge-bg); padding: 2px 8px; border-radius: 10px;
 }
 
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+.header-actions { display: flex; align-items: center; gap: 10px; }
 
 .filter-tabs {
-  display: flex;
-  gap: 3px;
-  background: var(--sidebar-bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 3px;
+  display: flex; gap: 3px;
+  background: var(--sidebar-bg); border: 1px solid var(--border);
+  border-radius: 8px; padding: 3px;
 }
-
 .filter-tab {
-  padding: 4px 10px;
-  border-radius: 6px;
-  border: none;
-  background: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  font-size: 12px;
-  transition: all 0.12s;
+  padding: 4px 10px; border-radius: 6px; border: none;
+  background: none; color: var(--text-muted); cursor: pointer;
+  font-size: 12px; transition: all 0.12s;
 }
 .filter-tab.active {
-  background: var(--panel-bg);
-  color: var(--text);
+  background: var(--panel-bg); color: var(--text);
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
 .add-btn {
-  padding: 7px 14px;
-  border: none;
-  border-radius: 8px;
-  color: #fff;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 500;
+  padding: 7px 14px; border: none; border-radius: 8px;
+  color: #fff; cursor: pointer; font-size: 13px; font-weight: 500;
   transition: opacity 0.12s;
 }
 .add-btn:hover { opacity: 0.85; }
 
-.content {
-  flex: 1;
-  overflow-y: auto;
-  padding: 16px 20px;
-}
+.content { flex: 1; overflow-y: auto; padding: 16px 20px; min-height: 0; }
 
 .empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  height: 100%;
-  color: var(--text-muted);
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 14px; height: 100%; color: var(--text-muted);
 }
 
 .items-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 10px;
-  align-content: start;
+  gap: 10px; align-content: start;
 }
 
-.preview-strip {
-  border-top: 1px solid var(--border);
-  height: 280px;
-  display: flex;
-  flex-direction: column;
+/* ── Horizontal splitter ──────────────────────────────────────────────────── */
+.h-splitter {
+  height: 8px;
   background: var(--sidebar-bg);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  cursor: row-resize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  transition: background 0.1s;
+}
+.h-splitter:hover { background: var(--hover-bg); }
+
+.h-track {
+  width: 40px; height: 2px;
+  background: var(--border); border-radius: 2px;
+}
+.h-splitter:hover .h-track { background: var(--accent); }
+
+.collapse-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%; transform: translateY(-50%);
+  width: 18px; height: 18px;
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 4px; color: var(--text-muted);
+  cursor: pointer; font-size: 9px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0; opacity: 0; transition: opacity 0.15s, color 0.1s;
+}
+.h-splitter:hover .collapse-btn { opacity: 1; }
+.collapse-btn:hover { color: var(--text); background: var(--active-bg); }
+
+/* ── Preview strip ────────────────────────────────────────────────────────── */
+.preview-strip {
+  display: flex; flex-direction: column;
+  background: var(--sidebar-bg);
+  flex-shrink: 0;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .preview-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 12px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 5px 12px;
   border-bottom: 1px solid var(--border);
-  font-size: 12px;
-  color: var(--text-muted);
+  font-size: 12px; color: var(--text-muted);
+  flex-shrink: 0;
 }
 
 .icon-btn {
