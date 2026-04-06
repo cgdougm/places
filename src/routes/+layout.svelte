@@ -101,14 +101,15 @@
   :global(body) {
     margin: 0; padding: 0;
     font-family: 'Google Sans Flex', 'Google Sans', Inter, system-ui, sans-serif;
-    background: var(--bg);
-    color: var(--text);
     overflow: hidden;
     height: 100vh;
+    /* Do NOT set color/background here — CSS vars are defined on .app, not body. */
   }
   :global(a) { color: inherit; text-decoration: none; }
   :global(button) { font-family: inherit; }
   :global(input), :global(textarea) { font-family: inherit; }
+  :global(::placeholder) { color: var(--text-muted); opacity: 1; }
+  :global(option) { background: var(--input-bg, #2a2a2f); color: var(--text, #f2f2f7); }
 
   /* Highlight.js dark theme override */
   :global(.hljs) { background: transparent; color: var(--text); }
@@ -119,6 +120,10 @@
     flex-direction: column;
     height: 100vh;
     overflow: hidden;
+    /* CSS vars are defined on .app, not on body, so set color here
+       so all descendants inherit the correct themed value. */
+    color: var(--text);
+    background: var(--bg);
   }
 
   .app-header {

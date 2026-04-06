@@ -250,6 +250,7 @@
   font-family: 'Cascadia Code', 'Fira Code', monospace;
   font-size: 0.88em;
   background: var(--code-bg);
+  color: var(--text-secondary);
   padding: 2px 5px;
   border-radius: 4px;
 }
