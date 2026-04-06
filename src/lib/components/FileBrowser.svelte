@@ -110,10 +110,16 @@
   // ── Context menu ──────────────────────────────────────────────────────────────
   let ctxEntry = $state<FileEntry | null>(null);
   let ctxX = $state(0), ctxY = $state(0);
+  let browserEl = $state<HTMLElement | null>(null);
 
   function openCtx(e: MouseEvent, entry: FileEntry) {
     e.preventDefault(); e.stopPropagation();
-    ctxEntry = entry; ctxX = e.offsetX; ctxY = e.offsetY;
+    ctxEntry = entry;
+    // Position relative to the .browser container (which has position:relative),
+    // not relative to the individual entry element (what offsetX/Y would give).
+    const rect = browserEl?.getBoundingClientRect();
+    ctxX = rect ? e.clientX - rect.left : e.offsetX;
+    ctxY = rect ? e.clientY - rect.top  : e.offsetY;
   }
   function closeCtx() { ctxEntry = null; }
 
@@ -153,7 +159,7 @@
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="browser" onclick={closeCtx} onkeydown={e => e.key === 'Escape' && closeCtx()}>
+<div class="browser" bind:this={browserEl} onclick={closeCtx} onkeydown={e => e.key === 'Escape' && closeCtx()}>
 
   <!-- Toolbar -->
   <div class="toolbar">
