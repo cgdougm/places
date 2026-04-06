@@ -3,6 +3,7 @@
   import ItemCard from './ItemCard.svelte';
   import AddItemModal from './AddItemModal.svelte';
   import FilePreview from './FilePreview.svelte';
+  import { getNum, set } from '$lib/utils/persist';
 
   let { project }: { project: Project } = $props();
 
@@ -18,7 +19,8 @@
   const MIN_PREVIEW = 80;
   const MAX_PREVIEW = 600;
 
-  let previewH  = $state(280);
+  let previewH  = $state(getNum('pane_previewH', 280));
+  $effect(() => { set('pane_previewH', previewH); });
   let dragging  = $state(false);
   let dragStartY = 0;
   let dragStartH = 0;

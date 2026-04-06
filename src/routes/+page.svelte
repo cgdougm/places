@@ -4,12 +4,18 @@
   import ProjectPanel from '$lib/components/ProjectPanel.svelte';
   import FileBrowser from '$lib/components/FileBrowser.svelte';
   import PlacesLogo from '$lib/components/PlacesLogo.svelte';
+  import { getNum, getBool, set } from '$lib/utils/persist';
 
-  // ── Pane widths ───────────────────────────────────────────────────────────────
-  let sidebarW    = $state(220);
-  let browserW    = $state(280);
-  let sidebarOpen = $state(true);
-  let browserOpen = $state(true);
+  // ── Pane widths (persisted) ───────────────────────────────────────────────────
+  let sidebarW    = $state(getNum('pane_sidebarW',    220));
+  let browserW    = $state(getNum('pane_browserW',    280));
+  let sidebarOpen = $state(getBool('pane_sidebarOpen', true));
+  let browserOpen = $state(getBool('pane_browserOpen', true));
+
+  $effect(() => { set('pane_sidebarW',    sidebarW);    });
+  $effect(() => { set('pane_browserW',    browserW);    });
+  $effect(() => { set('pane_sidebarOpen', sidebarOpen); });
+  $effect(() => { set('pane_browserOpen', browserOpen); });
 
   const MIN_W = 140;
   const MAX_SIDEBAR = 400;
