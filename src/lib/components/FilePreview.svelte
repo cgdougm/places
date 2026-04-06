@@ -21,7 +21,7 @@
 
   let { path }: { path: string } = $props();
 
-  type Mode = 'loading' | 'text' | 'markdown' | 'image' | 'video' | 'unsupported';
+  type Mode = 'loading' | 'text' | 'markdown' | 'image' | 'video' | 'pdf' | 'unsupported';
 
   let mode = $state<Mode>('loading');
   let textContent = $state('');
@@ -39,6 +39,9 @@
   ]);
   const IMAGE_EXTS = new Set(['png','jpg','jpeg','gif','webp','svg','bmp','ico','avif']);
   const VIDEO_EXTS = new Set(['mp4','webm','ogg','mov']);
+  // PDF: native embed works in WebView2 (Windows/Chromium). On Linux/WebKitGTK
+  // the browser plugin is rarely present, so we show a fallback with an Open button.
+  const PDF_MAX_MB = 50;
   const MD_EXTS = new Set(['md','markdown']);
 
   const EXT_LANG: Record<string, string> = {
@@ -67,6 +70,15 @@
         const b64 = await invoke<string>('read_binary_file', { path });
         assetUrl = `data:${MIME[ext] ?? 'video/mp4'};base64,${b64}`;
         mode = 'video';
+      } catch (e) { error = String(e); mode = 'unsupported'; }
+      return;
+    }
+
+    if (ext === 'pdf') {
+      try {
+        const b64 = await invoke<string>('read_binary_file', { path, maxMb: PDF_MAX_MB });
+        assetUrl = `data:application/pdf;base64,${b64}`;
+        mode = 'pdf';
       } catch (e) { error = String(e); mode = 'unsupported'; }
       return;
     }
@@ -127,6 +139,20 @@
       <video src={assetUrl} controls preload="metadata">
         Your browser does not support video playback.
       </video>
+    </div>
+
+  {:else if mode === 'pdf'}
+    <!-- WebView2 (Windows/Chromium) renders PDFs natively in <embed>.
+         On Linux/WebKitGTK the plugin is rarely available so we show a fallback. -->
+    <div class="pdf-wrap">
+      <embed src={assetUrl} type="application/pdf" class="pdf-embed" />
+      <div class="pdf-fallback">
+        <p>PDF preview requires a browser PDF plugin.<br/>
+          <button class="open-btn" onclick={() => invoke('open_path', { path })}>
+            Open in system viewer
+          </button>
+        </p>
+      </div>
     </div>
 
   {:else if mode === 'markdown'}
@@ -198,6 +224,44 @@
   max-width: 100%;
   max-height: 100%;
 }
+
+.pdf-wrap {
+  flex: 1;
+  display: grid;         /* stack embed + fallback in same cell */
+  grid-template: 1fr / 1fr;
+  overflow: hidden;
+}
+.pdf-embed {
+  grid-area: 1/1;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+/* The fallback sits behind the embed. If the embed renders (WebView2),
+   it covers the fallback. If it doesn't (Linux), the fallback shows. */
+.pdf-fallback {
+  grid-area: 1/1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 13px;
+  text-align: center;
+  line-height: 1.7;
+  z-index: -1;
+}
+.open-btn {
+  margin-top: 8px;
+  padding: 7px 16px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+}
+.open-btn:hover { opacity: 0.85; }
 
 .md-toolbar {
   display: flex;
