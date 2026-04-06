@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { PlaceItem, Project } from '$lib/types';
   import { updateItem, deleteItem } from '$lib/stores/projects.svelte';
+  import { requestJump } from '$lib/stores/browser.svelte';
   import { invoke } from '@tauri-apps/api/core';
   import { basename } from '$lib/utils/paths';
 
@@ -63,6 +64,7 @@
       {/if}
       {#if item.type === 'file'}
         <button class="icon-btn" onclick={reveal} title="Reveal in explorer">📂</button>
+        <button class="icon-btn" onclick={() => requestJump(item.value)} title="Jump to in file browser">🎯</button>
       {/if}
       <button class="icon-btn" onclick={startEdit} title="Edit">✎</button>
       <button class="icon-btn danger" onclick={() => deleteItem(project.id, item.id)} title="Remove">✕</button>

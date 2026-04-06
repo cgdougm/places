@@ -1,0 +1,103 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" width="512" height="512" style="background:transparent">
+  <defs>
+    
+  </defs>
+
+  <!-- 
+    Center circle radius: r_c
+    Satellite radius: r_s = 0.75 * r_c
+    Line width: 0.10 * diameter_center = 0.20 * r_c
+    
+    Canvas: 512x512, center at (256, 256)
+    
+    r_c = 72  → diameter = 144
+    r_s = 54
+    line stroke-width = 14.4
+
+    Satellite distance from center (center to center):
+    r_c + gap + r_s = 72 + 40 + 54 = 166
+    (gap chosen so circles breathe without being too far)
+
+    Angles:
+      11 o'clock = 300° (from 12 o'clock, clockwise) = -60° from positive x-axis
+        in SVG coords: angle = 300° → x = cos(300°)*d, y = sin(300°)*d
+        300° CW from top = -60° from right axis
+        cos(-60°)=0.5, sin(-60°)=-0.866  → satellite at (256+83, 256-143.8) = (339, 112)
+        Wait — 11 o'clock: 330° CW from 12 = -150° from right
+        cos(330°)=0.866, sin(330°)=-0.5 → (256+143.8, 256-83) 
+        
+        Let me recalculate cleanly.
+        12 o'clock = top = 270° in standard math angle (or -90°)
+        Going clockwise:
+        11 o'clock = 270° - 30° = 240° in standard
+        4 o'clock  = 270° + 120° = 30° in standard  
+        7 o'clock  = 270° + 210° = 120° in standard
+
+        d = 166
+        11 o'clock (240° standard): x=cos(240°)*166=-83, y=sin(240°)*166=-143.7 (SVG y flips → +143.7)
+          → (256-83, 256+143.7) — that's bottom left, wrong
+        
+        SVG convention: 0° = right, angles go clockwise (y axis down)
+        12 o'clock in SVG = 270° (straight up in SVG = negative y direction)
+        11 o'clock = 270°-30° = 240° — wait let me just use clock positions directly.
+        
+        A clock: 12=top, 3=right, 6=bottom, 9=left
+        Each hour = 30°
+        11 = 330° (CW from top), which in SVG angle = -90° + 330° = 240°
+           cos(240°)=-0.5, sin(240°)=-0.866 → (-0.5*166, -0.866*166) = (-83, -143.8)
+           Position: (256-83, 256-143.8) = (173, 112) ✓ (upper left)
+        
+        4 = 120° CW from top → SVG angle = -90°+120° = 30°
+           cos(30°)=0.866, sin(30°)=0.5 → (143.8, 83)
+           Position: (256+143.8, 256+83) = (400, 339) ✓ (lower right)
+        
+        7 = 210° CW from top → SVG angle = -90°+210° = 120°
+           cos(120°)=-0.5, sin(120°)=0.866 → (-83, 143.8)
+           Position: (256-83, 256+143.8) = (173, 400) ✓ (lower left)
+  -->
+
+  <!-- Line stroke width = 10% of center diameter = 0.10 * 144 = 14.4 -->
+  <!-- Lines from center to satellite centers, but only to their edges -->
+  <!-- Center circle edge: 72px from center -->
+  <!-- Satellite circle edge: 54px from satellite center -->
+  
+  <!-- 
+    Line from (256,256) to satellite, clipped between the two circle edges.
+    For satellite at angle a, distance d=166:
+      sat_x = 256 + cos(a)*166
+      sat_y = 256 + sin(a)*166
+    Line start: center + unit_vec * 72
+    Line end: sat - unit_vec * 54
+    
+    11 o'clock a=240° unit=(-0.5, -0.866)
+      start: (256+(-0.5)*72, 256+(-0.866)*72) = (220, 193.6)
+      end: (173+0.5*54, 112+0.866*54) = (173+27, 112+46.8) = (200, 158.8)
+    
+    4 o'clock a=30° unit=(0.866, 0.5)
+      start: (256+0.866*72, 256+0.5*72) = (318.4, 292)
+      end: (400-0.866*54, 339-0.5*54) = (400-46.8, 339-27) = (353.2, 312)
+    
+    7 o'clock a=120° unit=(-0.5, 0.866)
+      start: (256+(-0.5)*72, 256+0.866*72) = (220, 318.4)
+      end: (173+0.5*54, 400-0.866*54) = (200, 353.2)
+  -->
+
+  <!-- Connector lines -->
+  <line stroke-width="14.4" stroke-linecap="round" x1="220" y1="193.6" x2="200" y2="158.8" style="fill:none;stroke:rgb(255, 255, 255);color:rgb(255, 255, 255);stroke-width:14.4px;stroke-linecap:round;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  
+  <line stroke-width="14.4" stroke-linecap="round" x1="318.4" y1="292" x2="353.2" y2="312" style="fill:none;stroke:rgb(255, 255, 255);color:rgb(255, 255, 255);stroke-width:14.4px;stroke-linecap:round;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  
+  <line stroke-width="14.4" stroke-linecap="round" x1="220" y1="318.4" x2="200" y2="353.2" style="fill:none;stroke:rgb(255, 255, 255);color:rgb(255, 255, 255);stroke-width:14.4px;stroke-linecap:round;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Center circle -->
+  <circle cx="256" cy="256" r="72" style="fill:rgb(255, 255, 255);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Satellite at 11 o'clock: (173, 112) -->
+  <circle cx="173" cy="112" r="54" style="fill:rgb(255, 255, 255);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Satellite at 4 o'clock: (400, 339) -->
+  <circle cx="400" cy="339" r="54" style="fill:rgb(255, 255, 255);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Satellite at 7 o'clock: (173, 400) -->
+  <circle cx="173" cy="400" r="54" style="fill:rgb(255, 255, 255);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+</svg>
